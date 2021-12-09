@@ -163,7 +163,7 @@ namespace perfolenta
 
             ScriptAssm = CompileScriptMethod(Text);
 
-            CreateStartMethodDelegates(ProgramModuleName.AsString());
+            CreateStartMethodDelegates(ProgramModuleName?.AsString());
 
             IsCompiled = true;
 
@@ -285,39 +285,44 @@ namespace perfolenta
 
         private void CreateStartMethodDelegates(string ProgramModuleName)
         {
+            var isEmpty = String.IsNullOrWhiteSpace(ProgramModuleName);
 
-            if (String.IsNullOrWhiteSpace(ProgramModuleName))
+            if (isEmpty)
                 ProgramModuleName = "Программа";
 
             var ns = NameSpace;
             if (String.IsNullOrWhiteSpace(ns))
             {
-                ns = "";
+                ns = ProgramModuleName;
             }
             else
             {
-                ns = ns + ".";
+                ns = ns + "."+ ProgramModuleName;
             };
-
-            Type tp = ScriptAssm.GetType(ns + ProgramModuleName);
-
-            if (tp is null)
-                throw new System.Exception("Модуль "+ProgramModuleName+" не найден.");
-
-            System.Reflection.MethodInfo met = tp.GetMethod("Старт", BindingFlags.IgnoreCase | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static );
-
-            if (met is null)
-                throw new System.Exception("Метод Старт в модуле " + ProgramModuleName + " не найден.");
 
             StartProcMethod = null;
             StartFuncMethod = null;
-            if (met.ReturnType == typeof(void))
-            {
-                StartProcMethod = (StartProcDelegate)Delegate.CreateDelegate(typeof(StartProcDelegate), null, met);
+
+            Type tp = ScriptAssm.GetType(ns);
+            if (tp is null) {
+                if (!isEmpty) throw new System.Exception("Модуль "+ProgramModuleName+" не найден.");
             }
             else
             {
-                StartFuncMethod = (StartFuncDelegate)Delegate.CreateDelegate(typeof(StartFuncDelegate), null, met);
+
+                System.Reflection.MethodInfo met = tp.GetMethod("Старт", BindingFlags.IgnoreCase | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static );
+
+                if (met is null)
+                    throw new System.Exception("Метод Старт в модуле " + ProgramModuleName + " не найден.");
+
+                if (met.ReturnType == typeof(void))
+                {
+                    StartProcMethod = (StartProcDelegate)Delegate.CreateDelegate(typeof(StartProcDelegate), null, met);
+                }
+                else
+                {
+                    StartFuncMethod = (StartFuncDelegate)Delegate.CreateDelegate(typeof(StartFuncDelegate), null, met);
+                };
             };
         }
 
@@ -444,6 +449,8 @@ namespace perfolenta
             //теперь в переменной окружения Path
 
             //теперь проверим в реестре, куда инсталлятор должен был записать путь
+
+
 
 
             throw new System.Exception("Не удалось найти путь к компилятору pflc.exe");
