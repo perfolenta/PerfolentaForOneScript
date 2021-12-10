@@ -7,6 +7,7 @@ using ScriptEngine.Machine.Values;
 using ScriptEngine.HostedScript.Library;
 using System.Collections.Generic;
 using System.Collections;
+using Microsoft.Win32;
 
 namespace perfolenta
 {
@@ -437,20 +438,77 @@ namespace perfolenta
                 return path;
             };
 
+            string programFiles = Environment.ExpandEnvironmentVariables("%ProgramW6432%");
+            //string programFilesX86 = Environment.ExpandEnvironmentVariables("%ProgramFiles(x86)%");
+            
             //теперь по стандартному пути инсталляции перфоленты
+            StartUpPath = programFiles + "\\Promcod\\Perfolenta";
             path = StartUpPath + pflexe;
             if (File.Exists(path))
             {
                 return path;
             };
 
-            //теперь в переменной окружения
+            EnvironmentVariableTarget[] evts = new EnvironmentVariableTarget[] {EnvironmentVariableTarget.Process, EnvironmentVariableTarget.User, EnvironmentVariableTarget.Machine};
+
+            //теперь в переменной окружения PERFOLENTA_HOME
+            string varName = "PERFOLENTA_HOME";
+            foreach (var evt in evts)
+            {
+                StartUpPath = Environment.GetEnvironmentVariable(varName, evt);
+                if (!(StartUpPath is null))
+                {
+                    path = StartUpPath + pflexe;
+                    if (File.Exists(path))
+                    {
+                        return path;
+                    };
+                };
+            };
 
             //теперь в переменной окружения Path
+            varName = "Path";
+            foreach (var evt in evts)
+            {
+                StartUpPath = Environment.GetEnvironmentVariable(varName, evt);
+                if (!(StartUpPath is null))
+                {
+                    foreach (var substr in StartUpPath.Split(';'))
+                    {
+                        path = substr + pflexe;
+                        if (File.Exists(path))
+                        {
+                            return path;
+                        };
+                    };
+                };
+            };
+
 
             //теперь проверим в реестре, куда инсталлятор должен был записать путь
-
-
+            try
+            {
+                using (RegistryKey key = Registry.CurrentUser.OpenSubKey("Software\\Promcod\\Perfolenta.Net"))
+                {
+                    if (key != null)
+                    {
+                        Object o = key.GetValue("Install Directory");
+                        if (o != null)
+                        {
+                            StartUpPath = o as String;
+                            path = StartUpPath + pflexe;
+                            if (File.Exists(path))
+                            {
+                                return path;
+                            };
+                        }
+                    }
+                }
+            }
+            catch  
+            {
+                //...
+            };
 
 
             throw new System.Exception("Не удалось найти путь к компилятору pflc.exe");
