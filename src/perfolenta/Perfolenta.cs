@@ -119,7 +119,7 @@ namespace perfolenta
         /// Запускает на выполнение метод Старт модуля Программа откомпилированного скрипта.
         /// </summary>
         [ContextMethod("Выполнить", "Execute")]
-        public IValue Execute(IValue ParamArray)
+        public IValue Execute(IValue ParamArray = null)
         {
             if (!IsCompiled)
                 throw new System.Exception("Текст скрипта не скомпилирован.");
@@ -227,7 +227,7 @@ namespace perfolenta
         /// тип Объект - результат выполнения метода Старт.
         /// </returns>
         [ContextMethod("КомпилироватьИВыполнить", "CompileAndExecute")]
-        public IValue CompileAndExecute(IValue ScriptText, IValue ParamArray)
+        public IValue CompileAndExecute(IValue ScriptText, IValue ParamArray = null)
         {
 
             if (ExecuteScriptMethod is null)
@@ -262,7 +262,7 @@ namespace perfolenta
         /// тип Объект - результат выполнения метода Старт.
         /// </returns>
         [ContextMethod("КомпилироватьИВыполнитьИзФайла", "CompileAndExecuteFromFile")]
-        public IValue CompileAndExecuteFromFile(IValue ScriptFilePath, IValue ParamArray)
+        public IValue CompileAndExecuteFromFile(IValue ScriptFilePath, IValue ParamArray = null)
         {
 
             if (ExecuteScriptFromFileMethod is null)
