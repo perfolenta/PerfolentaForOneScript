@@ -20,8 +20,11 @@ namespace perfolenta
         delegate object ExecuteMethodDelegate(string text, params object[] mas);
         delegate Assembly CompileMethodDelegate(string text);
 
-        delegate object StartFuncDelegate(object parameter);
-        delegate void StartProcDelegate(object parameter);
+        //**О** этот способ позволяет использовать в параметрах только тип Object
+        //поэтому он был заменен на генерацию динамического метода, 
+        //но пока он оставлен в закомментированном виде 
+        //delegate object StartFuncDelegate(object parameter);
+        //delegate void StartProcDelegate(object parameter);
 
         private string CompilerPath;
         private Assembly CompilerAssm;
@@ -34,8 +37,11 @@ namespace perfolenta
         private ExecuteMethodDelegate ExecuteScriptMethod;
         private ExecuteMethodDelegate ExecuteScriptFromFileMethod;
 
-        private StartFuncDelegate StartFuncMethod;
-        private StartProcDelegate StartProcMethod;
+        //**О**
+        //private StartFuncDelegate StartFuncMethod;
+        //private StartProcDelegate StartProcMethod;
+
+        private FastInvoke FastInvokeObject;
 
         private bool IsCompiled;
 
@@ -119,21 +125,43 @@ namespace perfolenta
         /// Запускает на выполнение метод Старт модуля Программа откомпилированного скрипта.
         /// </summary>
         [ContextMethod("Выполнить", "Execute")]
-        public IValue Execute(IValue ParamArray = null)
+        public IValue Execute(IValue ParamArray)
         {
             if (!IsCompiled)
                 throw new System.Exception("Текст скрипта не скомпилирован.");
 
-            if (!(StartProcMethod is null))
+            if (FastInvokeObject.MyMethodInfo.ReturnType == typeof(void))
             {
-                StartProcMethod(ConvertParam(ParamArray));
+                FastInvokeObject.ExecuteDelegate(new object[] { ConvertParam(ParamArray) });
                 return ValueFactory.CreateNullValue();
             }
-            else {
-                return ConvertResult(StartFuncMethod(ConvertParam(ParamArray)));
+            else
+            {
+                return ConvertResult(FastInvokeObject.ExecuteDelegate(new object[] { ConvertParam(ParamArray) }));
             };
 
         }
+
+        //**О**
+        ///// <summary>
+        ///// Запускает на выполнение метод Старт модуля Программа откомпилированного скрипта.
+        ///// </summary>
+        //[ContextMethod("Выполнить", "Execute")]
+        //public IValue Execute(IValue ParamArray = null)
+        //{
+        //    if (!IsCompiled)
+        //        throw new System.Exception("Текст скрипта не скомпилирован.");
+        //
+        //    if (!(StartProcMethod is null))
+        //    {
+        //        StartProcMethod(ConvertParam(ParamArray));
+        //        return ValueFactory.CreateNullValue();
+        //    }
+        //    else
+        //    {
+        //        return ConvertResult(StartFuncMethod(ConvertParam(ParamArray)));
+        //    };
+        //}
 
         /// <summary>
         /// Компилирует скрипт находящийся в свойстве Текст.
@@ -301,8 +329,9 @@ namespace perfolenta
                 ns = ns + "."+ ProgramModuleName;
             };
 
-            StartProcMethod = null;
-            StartFuncMethod = null;
+            //**О**
+            //StartProcMethod = null;
+            //StartFuncMethod = null;
 
             Type tp = ScriptAssm.GetType(ns);
             if (tp is null) {
@@ -310,20 +339,22 @@ namespace perfolenta
             }
             else
             {
+                FastInvokeObject = new FastInvoke(tp, "Старт");
 
-                System.Reflection.MethodInfo met = tp.GetMethod("Старт", BindingFlags.IgnoreCase | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static );
-
-                if (met is null)
-                    throw new System.Exception("Метод Старт в модуле " + ProgramModuleName + " не найден.");
-
-                if (met.ReturnType == typeof(void))
-                {
-                    StartProcMethod = (StartProcDelegate)Delegate.CreateDelegate(typeof(StartProcDelegate), null, met);
-                }
-                else
-                {
-                    StartFuncMethod = (StartFuncDelegate)Delegate.CreateDelegate(typeof(StartFuncDelegate), null, met);
-                };
+                //**О**
+                //System.Reflection.MethodInfo met = tp.GetMethod("Старт", BindingFlags.IgnoreCase | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static );
+                //
+                //if (met is null)
+                //    throw new System.Exception("Метод Старт в модуле " + ProgramModuleName + " не найден.");
+                //
+                //if (met.ReturnType == typeof(void))
+                //{
+                //    StartProcMethod = (StartProcDelegate)Delegate.CreateDelegate(typeof(StartProcDelegate), null, met);
+                //}
+                //else
+                //{
+                //    StartFuncMethod = (StartFuncDelegate)Delegate.CreateDelegate(typeof(StartFuncDelegate), null, met);
+                //};
             };
         }
 
