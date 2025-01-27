@@ -98,15 +98,15 @@ opm install -f <ПутьКФайлу>
 opm install perfolenta
 ```
 Для установки языка Перфолента скачайте и запустите инсталлятор с официального сайта: <br>
-[Загрузка файлов и документации языка Перфолента](http://promcod.com.ua/subcat.asp?cat=perfolenta-programmig-language&subcat=perfolenta-download)
+[Загрузка файлов и документации языка Перфолента](https://perfolenta.net/cat.asp?cat=download)
 
 ## Дополнительная информация
 
-[Статья об интеграции языков OneScript и Перфолента](http://promcod.com.ua/Article.asp?code=20211210023810008537)
+[Статья об интеграции языков OneScript и Перфолента](https://perfolenta.net/Article.asp?code=20211210023810008537)
 
 ## Сайт языка программирования Перфолента
 
-[Переход на сайт языка Перфолента.Net](http://promcod.com.ua/cat.asp?cat=perfolenta-programmig-language)
+[Переход на сайт языка Перфолента.Net](https://perfolenta.net)
   
 ## Лицензия
 
